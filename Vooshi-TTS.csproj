@@ -423,12 +423,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="ElevenLabs" Version="0.9.0" />
 	  <PackageReference Include="RabbitMQ.Client" Version="5.2.0" />
 	</ItemGroup>
 	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(MateEnginePath)\Mods&quot;" />
 		<Exec Command="COPY &quot;$(ProjectDir)\vooshi-config.txt&quot; &quot;$(MateEnginePath)\&quot;" />
+  
+		<!-- Copy dependency DLLs -->
+		<Exec Command="COPY &quot;$(ProjectDir)bin\Debug\netstandard2.1\RabbitMQ.Client.dll&quot; &quot;$(MateEnginePath)\Mods&quot;" />
 	</Target>
 </Project>
