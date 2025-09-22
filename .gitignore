@@ -1,0 +1,8 @@
+# Build artifacts
+bin/
+obj/
+
+# VS settings/cache
+.vs/
+*.user
+*.suo

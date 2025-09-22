@@ -25,7 +25,24 @@ namespace Vooshi_TTS {
         private CancellationTokenSource cts = new CancellationTokenSource();
         private AudioSource audioSource;
 
+        static Dictionary<string, string> LoadConfig(string path)
+        {
+            var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
+                    continue;
+
+                var parts = line.Split('=', 2);
+                if (parts.Length == 2)
+                {
+                    dict[parts[0].Trim()] = parts[1].Trim();
+                }
+            }
+
+            return dict;
+        }
 
         public override void OnInitializeMelon()
         {
@@ -44,12 +61,15 @@ namespace Vooshi_TTS {
             {
                 try
                 {
+                    var path = Path.Combine(AppContext.BaseDirectory, "vooshi-config.txt");
+                    var config = LoadConfig(path);
+
                     var factory = new ConnectionFactory()
                     {
-                        HostName = "*",
-                        Port = 5672,
-                        UserName = "*",
-                        Password = "*",
+                        HostName = config.GetValue("HostName", "localhost"),
+                        Port = config.GetValue("Port", 5672),
+                        UserName = config.GetValue("UserName", "rabbitmquser"),
+                        Password = config.GetValue("Password", "rabbitmqpassword"),
                         VirtualHost = "/",
                         AutomaticRecoveryEnabled = true,
                         NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
@@ -231,5 +251,20 @@ namespace Vooshi_TTS {
             // Optional: Add periodic connection health check
             // This runs every frame, so be careful with performance
         }
+    }
+
+    static class ConfigExtensions
+    {
+        public static string GetValue(this Dictionary<string, string> config, string key, string defaultValue)
+            => config.TryGetValue(key, out var value) ? value : defaultValue;
+
+        public static int GetValue(this Dictionary<string, string> config, string key, int defaultValue)
+            => config.TryGetValue(key, out var value) && int.TryParse(value, out var result) ? result : defaultValue;
+
+        public static bool GetValue(this Dictionary<string, string> config, string key, bool defaultValue)
+            => config.TryGetValue(key, out var value) && bool.TryParse(value, out var result) ? result : defaultValue;
+
+        public static ushort GetValue(this Dictionary<string, string> config, string key, ushort defaultValue)
+            => config.TryGetValue(key, out var value) && ushort.TryParse(value, out var result) ? result : defaultValue;
     }
 }

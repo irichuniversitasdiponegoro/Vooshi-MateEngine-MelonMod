@@ -1,0 +1,4 @@
+HostName=localhost
+Port=5672
+UserName=user
+Password=pw
